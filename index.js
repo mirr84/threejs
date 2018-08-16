@@ -160,7 +160,7 @@ const init = () => {
     var geometry = new THREE.SphereGeometry( 1, 8, 8 );
     var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
     var sphere = new THREE.Mesh( geometry, material );
-    sphere.position.set(50, 40, 50);
+    sphere.position.set(50, 40, 40);
     sphere.castShadow = true;
     sphere.receiveShadow = true;
     scene.add( sphere );
@@ -182,7 +182,7 @@ const init = () => {
     scene.add( floor );
 
     // objects
-    var boxGeometry = new THREE.BoxBufferGeometry( 9.9, 9.9, 9.9 );
+    var boxGeometry = new THREE.BoxBufferGeometry( 8, 8, 1 );
     boxGeometry = boxGeometry.toNonIndexed();
 
     var a = 0, b = 0;
