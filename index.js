@@ -146,9 +146,24 @@ const init = () => {
     document.addEventListener( 'keyup', onKeyUp, false );
 
     // light
-    var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-    light.position.set( 0.5, 1, 0.75 );
+    var light = new THREE.PointLight( 0xffffff, 1, 100 );
+    light.position.set( 50, 50, 50 );
+    light.castShadow = true;
     scene.add( light );
+
+    var geometry = new THREE.SphereGeometry( 1, 8, 8 );
+    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    var sphere = new THREE.Mesh( geometry, material );
+    sphere.position.set(light.position.x, light.position.y, light.position.z);
+    scene.add( sphere );
+
+    var geometry = new THREE.SphereGeometry( 1, 8, 8 );
+    var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
+    var sphere = new THREE.Mesh( geometry, material );
+    sphere.position.set(50, 50, 40);
+    sphere.castShadow = true;
+    sphere.receiveShadow = false;
+    scene.add( sphere );
 
     // floor
     var floorGeometry = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
@@ -158,18 +173,20 @@ const init = () => {
     scene.add( floor );
 
     // objects
-    var boxGeometry = new THREE.BoxBufferGeometry( 10, 10, 10 );
+    var boxGeometry = new THREE.BoxBufferGeometry( 9.9, 9.9, 9.9 );
     boxGeometry = boxGeometry.toNonIndexed();
 
     var a = 0, b = 0;
     for ( var i = 0; i < 100; i ++ ) {
-        var boxMaterial = new THREE.MeshPhongMaterial( { flatShading: true, color: 0xffffff } );
+        var boxMaterial = new THREE.MeshStandardMaterial( { flatShading: true, color: 0xffffff } );
 
         var box = new THREE.Mesh( boxGeometry, boxMaterial );
 
         box.position.x = Math.floor( a*10 + 5 );
         box.position.y = Math.floor( b*10 + 5 );
         box.position.z = Math.floor( 0 + 5 );
+        box.receiveShadow = true;
+        sphere.receiveShadow = false;
 
         scene.add( box );
         objects.push( box );
@@ -183,6 +200,9 @@ const init = () => {
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
+
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     window.addEventListener( 'resize', onWindowResize, false );
 }
