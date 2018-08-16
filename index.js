@@ -146,12 +146,12 @@ const init = () => {
     document.addEventListener( 'keyup', onKeyUp, false );
 
     // light
-    var light = new THREE.PointLight( 0xffffff, 1, 100 );
+    var light = new THREE.PointLight( 0xffffff, 1, 1000 );
     light.position.set( 50, 50, 50 );
     light.castShadow = true;
     scene.add( light );
 
-    var geometry = new THREE.SphereGeometry( 1, 8, 8 );
+    var geometry = new THREE.SphereGeometry( 1, 4, 4 );
     var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
     var sphere = new THREE.Mesh( geometry, material );
     sphere.position.set(light.position.x, light.position.y, light.position.z);
@@ -160,16 +160,25 @@ const init = () => {
     var geometry = new THREE.SphereGeometry( 1, 8, 8 );
     var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
     var sphere = new THREE.Mesh( geometry, material );
+    sphere.position.set(50, 40, 50);
+    sphere.castShadow = true;
+    sphere.receiveShadow = true;
+    scene.add( sphere );
+
+    var geometry = new THREE.SphereGeometry( 1, 8, 8 );
+    var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
+    var sphere = new THREE.Mesh( geometry, material );
     sphere.position.set(50, 50, 40);
     sphere.castShadow = true;
-    sphere.receiveShadow = false;
+    sphere.receiveShadow = true;
     scene.add( sphere );
 
     // floor
-    var floorGeometry = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
+    var floorGeometry = new THREE.PlaneBufferGeometry( 1000, 1000, 1, 1 );
     floorGeometry.rotateX( - Math.PI / 2 );
-    var floorMaterial = new THREE.MeshBasicMaterial( { color: 0xff, wireframe: true } );
+    var floorMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
     var floor = new THREE.Mesh( floorGeometry, floorMaterial );
+    floor.receiveShadow = true;
     scene.add( floor );
 
     // objects
@@ -178,15 +187,16 @@ const init = () => {
 
     var a = 0, b = 0;
     for ( var i = 0; i < 100; i ++ ) {
-        var boxMaterial = new THREE.MeshStandardMaterial( { flatShading: true, color: 0xffffff } );
+        var boxMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff } );
 
         var box = new THREE.Mesh( boxGeometry, boxMaterial );
 
         box.position.x = Math.floor( a*10 + 5 );
         box.position.y = Math.floor( b*10 + 5 );
         box.position.z = Math.floor( 0 + 5 );
+
+        box.castShadow = true;
         box.receiveShadow = true;
-        sphere.receiveShadow = false;
 
         scene.add( box );
         objects.push( box );
