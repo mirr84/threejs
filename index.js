@@ -5,6 +5,8 @@ var objects = [];
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
 
+var raycaster;
+
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 if ( havePointerLock ) {
 
@@ -173,6 +175,9 @@ const init = () => {
     sphere.receiveShadow = true;
     scene.add( sphere );
 
+    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+
+
     // floor
     var boxGeometryFloor = new THREE.BoxBufferGeometry( 10, 1, 10 );
     boxGeometryFloor = boxGeometryFloor.toNonIndexed();
@@ -183,7 +188,7 @@ const init = () => {
             var floor = new THREE.Mesh( boxGeometryFloor, boxMaterialFloor );
 
             floor.position.x = Math.floor( i*10 );
-            floor.position.y = Math.floor( 0 );
+            floor.position.y = Math.floor( 0+i-10 );
             floor.position.z = Math.floor( j*10 );
 
             floor.castShadow = true;
@@ -232,33 +237,40 @@ const init = () => {
 const animate = ()  => {
 
     requestAnimationFrame( animate );
-
     if ( controlsEnabled === true ) {
+
+        raycaster.ray.origin.copy( controls.getObject().position );
+        raycaster.ray.origin.y -= 10;
+        var intersections = raycaster.intersectObjects( objects );
+        var onObject = intersections.length > 0;
 
         var time = performance.now();
         var delta = ( time - prevTime ) / 1000;
 
         velocity.x -= velocity.x * 10.0 * delta;
         velocity.z -= velocity.z * 10.0 * delta;
-        velocity.y -= velocity.y * 10.0 * delta;
+        velocity.y -= 9.8 * 1.0 * delta; // 100.0 = mass
 
         direction.z = Number( moveForward ) - Number( moveBackward );
         direction.x = Number( moveLeft ) - Number( moveRight );
-        direction.normalize();
+        direction.normalize(); // this ensures consistent movements in all directions
 
         if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
         if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
+        if ( onObject === true ) {
+            velocity.y = Math.max( 5, velocity.y );
+        }
 
         controls.getObject().translateX( velocity.x * delta );
         controls.getObject().translateY( velocity.y * delta );
         controls.getObject().translateZ( velocity.z * delta );
 
-        controls.getObject().position.y = 10;
+        if ( controls.getObject().position.y < 10 ) {
+            velocity.y = 0;
+        }
 
         prevTime = time;
-
     }
-
     renderer.render( scene, camera );
 
 }
