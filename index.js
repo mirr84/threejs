@@ -174,12 +174,25 @@ const init = () => {
     scene.add( sphere );
 
     // floor
-    var floorGeometry = new THREE.PlaneBufferGeometry( 1000, 1000, 1, 1 );
-    floorGeometry.rotateX( - Math.PI / 2 );
-    var floorMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
-    var floor = new THREE.Mesh( floorGeometry, floorMaterial );
-    floor.receiveShadow = true;
-    scene.add( floor );
+    var boxGeometryFloor = new THREE.BoxBufferGeometry( 10, 1, 10 );
+    boxGeometryFloor = boxGeometryFloor.toNonIndexed();
+
+    for (let i = -20; i<20; i++ )
+        for (let j = -20; j<20; j++ ) {
+            var boxMaterialFloor = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+            var floor = new THREE.Mesh( boxGeometryFloor, boxMaterialFloor );
+
+            floor.position.x = Math.floor( i*10 );
+            floor.position.y = Math.floor( 0 );
+            floor.position.z = Math.floor( j*10 );
+
+            floor.castShadow = true;
+            floor.receiveShadow = true;
+
+            scene.add( floor );
+            objects.push( floor );
+
+        }
 
     // objects
     var boxGeometry = new THREE.BoxBufferGeometry( 8, 8, 1 );
@@ -199,7 +212,6 @@ const init = () => {
         box.receiveShadow = true;
 
         scene.add( box );
-        objects.push( box );
 
         a++;
         if (a == 10) { b++; a = 0; };
