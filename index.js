@@ -148,8 +148,8 @@ const init = () => {
     document.addEventListener( 'keyup', onKeyUp, false );
 
     // light
-    var light = new THREE.PointLight( 0xffffff, 1, 1000 );
-    light.position.set( 50, 50, 50 );
+    var light = new THREE.PointLight( 0xffffff, 1, 100000 );
+    light.position.set( 50, 100, 50 );
     light.castShadow = true;
     scene.add( light );
 
@@ -159,27 +159,10 @@ const init = () => {
     sphere.position.set(light.position.x, light.position.y, light.position.z);
     scene.add( sphere );
 
-    var geometry = new THREE.SphereGeometry( 1, 8, 8 );
-    var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
-    var sphere = new THREE.Mesh( geometry, material );
-    sphere.position.set(50, 40, 40);
-    sphere.castShadow = true;
-    sphere.receiveShadow = true;
-    scene.add( sphere );
-
-    var geometry = new THREE.SphereGeometry( 1, 8, 8 );
-    var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
-    var sphere = new THREE.Mesh( geometry, material );
-    sphere.position.set(50, 50, 40);
-    sphere.castShadow = true;
-    sphere.receiveShadow = true;
-    scene.add( sphere );
-
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
-
     // floor
-    var boxGeometryFloor = new THREE.BoxBufferGeometry( 10, 1, 10 );
+    var boxGeometryFloor = new THREE.BoxBufferGeometry( 100, 1, 100 );
     boxGeometryFloor = boxGeometryFloor.toNonIndexed();
 
     for (let i = -20; i<20; i++ )
@@ -187,9 +170,9 @@ const init = () => {
             var boxMaterialFloor = new THREE.MeshStandardMaterial( { color: 0xffffff } );
             var floor = new THREE.Mesh( boxGeometryFloor, boxMaterialFloor );
 
-            floor.position.x = Math.floor( i*10 );
-            floor.position.y = Math.floor( 0+i-10 );
-            floor.position.z = Math.floor( j*10 );
+            floor.position.x = Math.floor( i*100 );
+            floor.position.y = Math.floor( 0-5 );
+            floor.position.z = Math.floor( j*100 );
 
             floor.castShadow = true;
             floor.receiveShadow = true;
@@ -200,27 +183,59 @@ const init = () => {
         }
 
     // objects
-    var boxGeometry = new THREE.BoxBufferGeometry( 8, 8, 1 );
-    boxGeometry = boxGeometry.toNonIndexed();
+    // var boxGeometry = new THREE.BoxBufferGeometry( 8, 8, 1 );
+    // boxGeometry = boxGeometry.toNonIndexed();
+    //
+    // var a = 0, b = 0;
+    // for ( var i = 0; i < 100; i ++ ) {
+    //     var boxMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+    //
+    //     var box = new THREE.Mesh( boxGeometry, boxMaterial );
+    //
+    //     box.position.x = Math.floor( a*10 + 5 );
+    //     box.position.y = Math.floor( b*10 + 5 );
+    //     box.position.z = Math.floor( 0 + 5 );
+    //
+    //     box.castShadow = true;
+    //     box.receiveShadow = true;
+    //
+    //     scene.add( box );
+    //
+    //     a++;
+    //     if (a == 10) { b++; a = 0; };
+    // }
 
-    var a = 0, b = 0;
-    for ( var i = 0; i < 100; i ++ ) {
+    const readTextFile = (file, callback) => {
+        var rawFile = new XMLHttpRequest();
+        rawFile.overrideMimeType("application/json");
+        rawFile.open("GET", file, true);
+        rawFile.onreadystatechange = function() {
+            if (rawFile.readyState === 4 && rawFile.status == "200") {
+                callback(rawFile.responseText);
+            }
+        }
+        rawFile.send(null);
+    }
+    readTextFile("./models/bild1.json", function(text){
+        var data = JSON.parse(text);
+
+        var boxGeometry = new THREE.BoxBufferGeometry( data.box.x, data.box.y, data.box.z );
+        boxGeometry = boxGeometry.toNonIndexed();
+
         var boxMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff } );
 
-        var box = new THREE.Mesh( boxGeometry, boxMaterial );
+        data.items.forEach(item => {
 
-        box.position.x = Math.floor( a*10 + 5 );
-        box.position.y = Math.floor( b*10 + 5 );
-        box.position.z = Math.floor( 0 + 5 );
+            var box = new THREE.Mesh( boxGeometry, boxMaterial );
+                box.position.x = Math.floor( item.x * data.box.x );
+                box.position.y = Math.floor( item.y * data.box.y );
+                box.position.z = Math.floor( item.z * data.box.z );
+                box.castShadow = true;
+                box.receiveShadow = true;
+            scene.add( box );
 
-        box.castShadow = true;
-        box.receiveShadow = true;
-
-        scene.add( box );
-
-        a++;
-        if (a == 10) { b++; a = 0; };
-    }
+        })
+    });
 
     // renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -237,6 +252,7 @@ const init = () => {
 const animate = ()  => {
 
     requestAnimationFrame( animate );
+
     if ( controlsEnabled === true ) {
 
         raycaster.ray.origin.copy( controls.getObject().position );
@@ -253,7 +269,7 @@ const animate = ()  => {
 
         direction.z = Number( moveForward ) - Number( moveBackward );
         direction.x = Number( moveLeft ) - Number( moveRight );
-        direction.normalize(); // this ensures consistent movements in all directions
+        direction.normalize();
 
         if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
         if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
@@ -271,6 +287,7 @@ const animate = ()  => {
 
         prevTime = time;
     }
+
     renderer.render( scene, camera );
 
 }
